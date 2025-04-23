@@ -10,6 +10,9 @@ import { fetchUser } from '@/features/auth/authSlice';
 import AddCustomer from '@/pages/AddCustomer';
 import ViewCustomers from '@/pages/ViewCustomers';
 import EditCustomer from '@/pages/EditCustomer';
+import AddSale from '@/pages/AddSale';
+import ViewSales from '@/pages/ViewSales';
+import SaleItemsPage from '@/pages/SaleItemsPage';
 
 
 const App = () => {
@@ -69,6 +72,31 @@ const App = () => {
     </ProtectedRoute>
   }
 />
+<Route
+  path="/add-sale"
+  element={
+    <ProtectedRoute>
+      <AddSale />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/sales" 
+  element={
+    <ProtectedRoute>
+      <ViewSales />
+    </ProtectedRoute>
+  }   
+  />
+<Route
+  path="/sale-items/:invoiceId"
+  element={
+    <ProtectedRoute>
+      <SaleItemsPage />
+    </ProtectedRoute>
+  }
+/>
+
 
   <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
