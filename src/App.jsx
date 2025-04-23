@@ -7,6 +7,10 @@ import ProtectedRoute from '@/routes/ProtectedRoute';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { fetchUser } from '@/features/auth/authSlice';
+import AddCustomer from '@/pages/AddCustomer';
+import ViewCustomers from '@/pages/ViewCustomers';
+import EditCustomer from '@/pages/EditCustomer';
+
 
 const App = () => {
   const dispatch = useDispatch();
@@ -25,11 +29,48 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/add-item" element={<ProtectedRoute><AddItem /></ProtectedRoute>} />
-        <Route path="/items" element={<ProtectedRoute><ViewItems /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+  <Route path="/login" element={<Login />} />
+
+  <Route path="/dashboard" element={
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  } />
+
+  <Route path="/add-item" element={
+    <ProtectedRoute>
+      <AddItem />
+    </ProtectedRoute>
+  } />
+
+  <Route path="/items" element={
+    <ProtectedRoute>
+      <ViewItems />
+    </ProtectedRoute>
+  } />
+
+  <Route path="/add-customer" element={
+    <ProtectedRoute>
+      <AddCustomer />
+    </ProtectedRoute>
+  } />
+
+  <Route path="/customers" element={
+    <ProtectedRoute>
+      <ViewCustomers />
+    </ProtectedRoute>
+  } />
+
+<Route
+  path="/edit-customer/:id"
+  element={
+    <ProtectedRoute>
+      <EditCustomer />
+    </ProtectedRoute>
+  }
+/>
+
+  <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>
   );
