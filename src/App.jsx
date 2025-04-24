@@ -98,7 +98,9 @@ const App = () => {
 />
 
 
-  <Route path="*" element={<Navigate to="/dashboard" />} />
+  <Route path="*" element={
+  access ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+} />
       </Routes>
     </BrowserRouter>
   );

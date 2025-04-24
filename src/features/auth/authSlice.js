@@ -57,15 +57,18 @@ const authSlice = createSlice({
             .addCase(loginUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
+                state.initialized = true;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.access = action.payload.access;
                 state.refresh = action.payload.refresh;
+                state.initialized = true;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.detail || 'Login failed';
+                state.initialized = true;
             })
 
             // ✅ Only ONE pending handler

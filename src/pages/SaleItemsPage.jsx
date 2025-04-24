@@ -30,8 +30,8 @@ const SaleItemsPage = () => {
         <tbody>
           {saleItems.map(si => (
             <tr key={si.id} className="text-center">
-              <td className="border p-2">{si.item?.code || '-'}</td>
-              <td className="border p-2">{si.item?.description || '-'}</td>
+              <td className="border p-2">{si.item_code || '-'}</td>
+              <td className="border p-2">{si.item_description || '-'}</td>
               <td className="border p-2">{si.quantity}</td>
               <td className="border p-2">₹{si.price}</td>
             </tr>

@@ -51,6 +51,26 @@ const ViewSales = () => {
     setTotalAmount(results.reduce((acc, curr) => acc + parseFloat(curr.total_amount), 0));
   }, [filters, sales]);
 
+  const downloadPDF = async (saleId, invoiceNumber) => {
+    try {
+      const res = await axios.get(`/invoice/${saleId}/pdf/`, {
+        headers: { Authorization: `Bearer ${access}` },
+        responseType: 'blob' // Required to handle PDF binary
+      });
+  
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${invoiceNumber}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert('❌ Failed to download PDF');
+      console.error(err);
+    }
+  };
+
   const exportToExcel = () => {
     const data = filteredSales.map(s => ({
       'Invoice #': s.invoice_number,
@@ -146,13 +166,14 @@ const ViewSales = () => {
               <td className="border p-2">{sale.date ? new Date(sale.date).toLocaleString() : 'N/A'}</td>
               <td className="border p-2">{sale.is_paid ? '✅' : '❌'}</td>
               <td className="border p-2">
-                <Link
-                  to={`http://localhost:8000/api/invoice/${sale.id}/pdf/`}
-                  target="_blank"
+              <td className="border p-2">
+                <button
+                  onClick={() => downloadPDF(sale.id, sale.invoice_number)}
                   className="text-blue-600 underline"
                 >
-                  PDF
-                </Link>
+                  Download PDF
+                </button>
+              </td>
               </td>
               <td className="border p-2">
                 {!sale.is_cancelled ? (

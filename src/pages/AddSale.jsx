@@ -53,8 +53,16 @@ const AddSale = () => {
         const item = getItem(r.code);
         return { item: item.id, quantity: r.quantity, price: item.selling_price };
       });
-      await axios.post('/sales/', {
+      console.log("token", access);
+      console.log('📦 Posting sale:', {
         customer,
+        total_amount: summary.total,
+        payment_method: 'cash',
+        payment_status: 'paid',
+        items: saleItems
+      });
+      await axios.post('/sales/', {
+        customer: parseInt(customer),
         total_amount: summary.total,
         payment_method: 'cash',
         payment_status: 'paid',
