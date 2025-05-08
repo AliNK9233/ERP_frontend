@@ -1,0 +1,58 @@
+@media print {
+    body {
+        -webkit-print-color-adjust: exact; /* Ensures color backgrounds if needed */
+        print-color-adjust: exact;
+      }
+    }
+  
+  .invoice-container {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm;
+    font-family: 'Arial', sans-serif;
+    font-size: 12pt;
+    color: #000;
+    background-color: #fff;
+  }
+  
+  .invoice-header, .invoice-footer {
+    margin-bottom: 20px;
+  }
+  
+  .invoice-logo {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin-bottom: 1rem;
+  }
+  
+  .invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .invoice-table th,
+  .invoice-table td {
+    border: 1px solid #888;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .invoice-table th {
+    background-color: #f0f0f0;
+  }
+  
+  .invoice-section-title {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 8px;
+  }
+  
+@media print {
+    .invoice-logo {
+      height: 60px !important;
+      width: auto !important;
+      max-width: 100%;
+    }}
