@@ -53,7 +53,7 @@ const ViewSales = () => {
 
   const downloadPDF = async (saleId, invoiceNumber) => {
     try {
-      const res = await axios.get(`/invoice/${saleId}/`, {
+      const res = await axios.get(`/test-invoice/${saleId}/`, {
         headers: { Authorization: `Bearer ${access}` },
         responseType: 'blob' // Required to handle PDF binary
       });

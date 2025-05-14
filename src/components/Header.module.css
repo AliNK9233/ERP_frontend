@@ -1,0 +1,41 @@
+.header {
+  @apply flex flex-col gap-2 p-4 border-b shadow-md;
+}
+
+.topBar {
+  @apply flex items-center justify-between;
+}
+
+.branding {
+  @apply flex items-center gap-3;
+}
+
+.testBox {
+  @apply bg-red-500 w-20 h-4;
+}
+
+.logo {
+  @apply rounded-full object-cover;
+  width: 40px;
+  height: 40px;
+}
+
+.businessName {
+  @apply font-semibold text-lg;
+}
+
+.userInfo {
+  @apply flex items-center gap-4;
+}
+
+.userText {
+  @apply text-sm text-gray-700;
+}
+
+.logoutButton {
+  @apply text-red-600 hover:underline text-sm;
+}
+
+.navLinks {
+  @apply flex flex-wrap gap-4 mt-2 text-sm text-blue-600 underline;
+}
