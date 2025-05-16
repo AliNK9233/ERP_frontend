@@ -1,0 +1,99 @@
+.view-customers-container {
+  padding: 1.5rem;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.view-customers-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.customers-table th,
+.customers-table td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.customers-table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+.edit-button {
+  color: #2563eb;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.no-data {
+  text-align: center;
+  padding: 1rem;
+  color: #6b7280;
+}
+.edit-customer-form {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.edit-customer-form h3 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.edit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.edit-grid input,
+.edit-grid textarea {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.edit-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.btn.save {
+  background-color: #16a34a;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn.cancel {
+  background-color: #d1d5db;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

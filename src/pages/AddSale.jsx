@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from '@/utils/axios';
 import { useSelector } from 'react-redux';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './Styles/AddSale.css';
 
 const AddSale = () => {
   const { access, user } = useSelector((state) => state.auth);
@@ -25,20 +28,32 @@ const AddSale = () => {
     }
   }, [access, user]);
 
+  const getItemByCode = (code) => items.find(i => i.code === code);
+
   const handleRowChange = (index, field, value) => {
     const updated = [...rows];
-    updated[index][field] = field === 'quantity' ? parseInt(value) : value;
+    if (field === 'quantity') {
+      const qty = parseInt(value);
+      updated[index][field] = qty >= 0 ? qty : 0;
+    } else {
+      updated[index][field] = value;
+    }
     setRows(updated);
   };
 
   const addRow = () => setRows([...rows, { code: '', quantity: 1 }]);
 
-  const getItem = (code) => items.find(i => i.code === code);
+  const deleteRow = (index) => {
+    if (rows.length === 1) return;
+    const updated = [...rows];
+    updated.splice(index, 1);
+    setRows(updated);
+  };
 
   useEffect(() => {
     let subtotal = 0;
     rows.forEach(({ code, quantity }) => {
-      const item = getItem(code);
+      const item = getItemByCode(code);
       if (item) subtotal += item.selling_price * quantity;
     });
     const tax = subtotal * (businessTax / 100);
@@ -48,19 +63,24 @@ const AddSale = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!customer) {
+      toast.error('Please select a customer');
+      return;
+    }
+
+    const invalidRow = rows.some(r => !r.code || r.quantity <= 0 || !getItemByCode(r.code));
+    if (invalidRow) {
+      toast.error('Please fill all item rows correctly');
+      return;
+    }
+
     try {
       const saleItems = rows.map(r => {
-        const item = getItem(r.code);
+        const item = getItemByCode(r.code);
         return { item: item.id, quantity: r.quantity, price: item.selling_price };
       });
-      console.log("token", access);
-      console.log('📦 Posting sale:', {
-        customer,
-        total_amount: summary.total,
-        payment_method: 'cash',
-        payment_status: 'paid',
-        items: saleItems
-      });
+
       await axios.post('/sales/', {
         customer: parseInt(customer),
         total_amount: summary.total,
@@ -70,46 +90,65 @@ const AddSale = () => {
       }, {
         headers: { Authorization: `Bearer ${access}` }
       });
-      alert('✅ Sale saved');
+
+      toast.success('✅ Sale saved successfully');
       setRows([{ code: '', quantity: 1 }]);
       setCustomer('');
     } catch {
-      alert('❌ Sale failed');
+      toast.error('❌ Sale failed');
     }
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">🧾 New Sale</h2>
-      <form onSubmit={handleSubmit} className="grid gap-3">
-        <select value={customer} onChange={(e) => setCustomer(e.target.value)} className="p-2 border rounded">
+    <div className="add-sale-container">
+      <ToastContainer />
+      <h2 className="add-sale-title">🧾 New Sale</h2>
+      <form onSubmit={handleSubmit} className="add-sale-form">
+        <select value={customer} onChange={(e) => setCustomer(e.target.value)}>
           <option value="">Select Customer</option>
           {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 
-        {rows.map((row, i) => (
-          <div key={i} className="grid grid-cols-4 gap-2">
-            <input type="text" placeholder="Item Code" value={row.code} onChange={(e) => handleRowChange(i, 'code', e.target.value)} className="border p-2" />
-            <input type="number" placeholder="Qty" value={row.quantity} onChange={(e) => handleRowChange(i, 'quantity', e.target.value)} className="border p-2" />
-            <span className="self-center">₹{getItem(row.code)?.selling_price || 0} x {row.quantity}</span>
-            <span className="self-center font-bold">₹{((getItem(row.code)?.selling_price || 0) * row.quantity).toFixed(2)}</span>
-          </div>
-        ))}
+        {rows.map((row, i) => {
+          const item = getItemByCode(row.code);
+          return (
+            <div key={i} className="sale-row">
+              <input
+                type="text"
+                placeholder="Item Code"
+                value={row.code}
+                onChange={(e) => handleRowChange(i, 'code', e.target.value)}
+              />
+              <input
+                type="number"
+                placeholder="Qty"
+                value={row.quantity}
+                min="0"
+                onChange={(e) => handleRowChange(i, 'quantity', e.target.value)}
+              />
+              <span>₹{item?.selling_price || 0} x {row.quantity}</span>
+              <span className="font-bold">₹{((item?.selling_price || 0) * row.quantity).toFixed(2)}</span>
+              {rows.length > 1 && (
+                <button type="button" onClick={() => deleteRow(i)} className="delete-row-btn">🗑️</button>
+              )}
+            </div>
+          );
+        })}
 
-        <button type="button" onClick={addRow} className="bg-blue-500 text-white px-4 py-2 rounded w-fit">+ Add Item</button>
+        <button type="button" onClick={addRow} className="add-row-btn">+ Add Item</button>
 
-        <div className="mt-4 border-t pt-4">
+        <div className="sale-summary">
           <p>Subtotal: ₹{summary.subtotal.toFixed(2)}</p>
           <p>Tax ({businessTax}%): ₹{summary.tax.toFixed(2)}</p>
           <p className="text-xl font-bold">Total: ₹{summary.total.toFixed(2)}</p>
         </div>
 
-        <div className="flex gap-6 mt-4">
+        <div className="sale-options">
           <label><input type="checkbox" checked={whatsapp} onChange={() => setWhatsapp(!whatsapp)} /> WhatsApp bill</label>
           <label><input type="checkbox" checked={emailBill} onChange={() => setEmailBill(!emailBill)} /> Email bill</label>
         </div>
 
-        <button type="submit" className="bg-green-600 text-white px-6 py-2 rounded">Save & Generate Invoice</button>
+        <button type="submit" className="submit-btn">Save & Generate Invoice</button>
       </form>
     </div>
   );

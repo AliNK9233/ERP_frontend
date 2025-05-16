@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import axios from '@/utils/axios';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import './Styles/ViewCustomers.css';
 
 const ViewCustomers = () => {
   const [customers, setCustomers] = useState([]);
+  const [editingCustomer, setEditingCustomer] = useState(null);
   const { access } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -23,47 +23,110 @@ const ViewCustomers = () => {
     fetchCustomers();
   }, [access]);
 
-  return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">👥 Customer List</h2>
-      <table className="w-full border-collapse border">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">Name</th>
-            <th className="border p-2">Phone</th>
-            <th className="border p-2">Address</th>
-            <th className="border p-2">GST No.</th>
-            <th className="border p-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {customers.map((c) => (
-            <tr key={c.id}>
-              <td className="border p-2">{c.name}</td>
-              <td className="border p-2">{c.phone}</td>
-              <td className="border p-2">{c.address}</td>
-              <td className="border p-2">{c.gst_number || '-'}</td>
-              <td className="border p-2">
-  <button
-    className="text-blue-600 underline"
-    onClick={() => navigate(`/edit-customer/${c.id}`)}
-  >
-    Edit
-  </button>
-</td>
-            </tr>
-          ))}
-          {customers.length === 0 && (
-            <tr>
-              <td colSpan="4" className="text-center p-4">
-                No customers found.
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditingCustomer({ ...editingCustomer, [name]: value });
+  };
 
-              </td>
-              
+  const handleSave = async () => {
+    try {
+      await axios.put(`/customers/${editingCustomer.id}/`, editingCustomer, {
+        headers: { Authorization: `Bearer ${access}` },
+      });
+      setCustomers((prev) =>
+        prev.map((c) => (c.id === editingCustomer.id ? editingCustomer : c))
+      );
+      setEditingCustomer(null);
+    } catch (err) {
+      alert('❌ Failed to update customer');
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="view-customers-container">
+      <h2 className="view-customers-title">👥 Customer List</h2>
+      <div className="table-wrapper">
+        <table className="customers-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>GST No.</th>
+              <th>Action</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {customers.map((c) => (
+              <tr key={c.id}>
+                <td>{c.name}</td>
+                <td>{c.phone}</td>
+                <td>{c.address}</td>
+                <td>{c.gst_number || '-'}</td>
+                <td>
+                  <button
+                    className="edit-button"
+                    onClick={() => setEditingCustomer(c)}
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {customers.length === 0 && (
+              <tr>
+                <td colSpan="5" className="no-data">
+                  No customers found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {editingCustomer && (
+        <div className="edit-customer-form">
+          <h3>✏️ Edit Customer: {editingCustomer.name}</h3>
+          <div className="edit-grid">
+            <input
+              name="name"
+              placeholder="Name"
+              value={editingCustomer.name}
+              onChange={handleEditChange}
+            />
+            <input
+              name="phone"
+              placeholder="Phone"
+              value={editingCustomer.phone}
+              onChange={handleEditChange}
+            />
+            <textarea
+              name="address"
+              placeholder="Address"
+              value={editingCustomer.address}
+              onChange={handleEditChange}
+            />
+            <input
+              name="gst_number"
+              placeholder="GST Number"
+              value={editingCustomer.gst_number || ''}
+              onChange={handleEditChange}
+            />
+          </div>
+          <div className="edit-actions">
+            <button className="btn save" onClick={handleSave}>
+              ✅ Save Changes
+            </button>
+            <button
+              className="btn cancel"
+              onClick={() => setEditingCustomer(null)}
+            >
+              ❌ Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

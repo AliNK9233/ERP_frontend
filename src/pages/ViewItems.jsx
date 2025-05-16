@@ -1,15 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from '@/utils/axios';
-import Header from '@/components/Header';
+import './Styles/ViewItems.css';
 
-const InvoicePage = () => {
+const ViewItems = () => {
+  const [editingItem, setEditingItem] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [invoiceNumber, setInvoiceNumber] = useState('INV-001');
-  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
-  const [customerName, setCustomerName] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
-  const printRef = useRef();
 
   const fetchItems = async () => {
     try {
@@ -22,12 +18,17 @@ const InvoicePage = () => {
     }
   };
 
-  const getTotal = () => {
-    return items.reduce((acc, item) => acc + (item.selling_price * item.quantity), 0);
-  };
+  const handleEdit = (item) => setEditingItem(item);
 
-  const handlePrint = () => {
-    window.print();
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await axios.delete(`/items/${id}/`);
+      setItems(items.filter((item) => item.id !== id));
+    } catch (err) {
+      alert('Delete failed!');
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -35,80 +36,100 @@ const InvoicePage = () => {
   }, []);
 
   return (
-    <div className="p-4 bg-white min-h-screen">
-      <Header />
-
-      {/* Print Button */}
-      <div className="max-w-4xl mx-auto my-4 text-right">
-        <button
-          onClick={handlePrint}
-          className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
-        >
-          🖨️ Print / Save as PDF
-        </button>
-      </div>
-
-      {/* Printable Invoice Section */}
-      <div
-        ref={printRef}
-        className="max-w-4xl mx-auto shadow-lg border p-6 bg-gray-50 rounded-lg print:p-0 print:shadow-none"
-      >
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-1">🧾 Invoice</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p><strong>Invoice No:</strong> {invoiceNumber}</p>
-              <p><strong>Date:</strong> {invoiceDate}</p>
-            </div>
-            <div>
-              <p><strong>Business Name:</strong> ABC Traders</p>
-              <p><strong>Address:</strong> 123 Market Street, City</p>
-              <p><strong>GSTIN:</strong> 22ABCDE1234F1Z5</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2">🧍 Customer Details</h3>
-          <p><strong>Name:</strong> {customerName}</p>
-          <p><strong>Address:</strong> {customerAddress}</p>
-        </div>
-
-        {loading ? (
-          <p>Loading items...</p>
-        ) : (
-          <>
-            <table className="min-w-full text-sm border mb-6">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="border p-2">#</th>
-                  <th className="border p-2">Description</th>
-                  <th className="border p-2">Qty</th>
-                  <th className="border p-2">Rate ₹</th>
-                  <th className="border p-2">Amount ₹</th>
+    <div className="view-items-container">
+      <h2 className="view-items-title">📦 Stock Items</h2>
+      {loading ? (
+        <p>Loading...</p>
+      ) : items.length === 0 ? (
+        <p>No items available.</p>
+      ) : (
+        <div className="table-wrapper">
+          <table className="items-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Brand</th>
+                <th>Qty</th>
+                <th>Sell ₹</th>
+                <th>Offer ₹</th>
+                <th>Expiry</th>
+                <th>Location</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.code}</td>
+                  <td>{item.description}</td>
+                  <td>{item.brand}</td>
+                  <td>{item.quantity}</td>
+                  <td>{item.selling_price}</td>
+                  <td>{item.offer_price || '-'}</td>
+                  <td>{item.expiry_date || '-'}</td>
+                  <td>{item.storage_location || '-'}</td>
+                  <td>
+                    <button onClick={() => handleEdit(item)} className="btn edit">Edit</button>
+                    <button onClick={() => handleDelete(item.id)} className="btn delete">Delete</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {items.map((item, index) => (
-                  <tr key={item.id} className="text-center">
-                    <td className="border p-1">{index + 1}</td>
-                    <td className="border p-1">{item.description}</td>
-                    <td className="border p-1">{item.quantity}</td>
-                    <td className="border p-1">{item.selling_price}</td>
-                    <td className="border p-1">{(item.quantity * item.selling_price).toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
 
-            <div className="text-right font-bold text-lg">
-              Total: ₹ {getTotal().toFixed(2)}
+          {editingItem && (
+            <div className="edit-form">
+              <h3>✏️ Edit Item: {editingItem.code}</h3>
+              <div className="edit-grid">
+                {[
+                  'description',
+                  'brand',
+                  'category',
+                  'quantity',
+                  'purchase_price',
+                  'selling_price',
+                  'offer_price',
+                  'expiry_date',
+                  'storage_location',
+                ].map((field) => (
+                  <input
+                    key={field}
+                    type={field.includes('price') || field === 'quantity' ? 'number' : field.includes('date') ? 'date' : 'text'}
+                    placeholder={field.replace(/_/g, ' ')}
+                    value={editingItem[field] || ''}
+                    onChange={(e) => setEditingItem({ ...editingItem, [field]: e.target.value })}
+                  />
+                ))}
+              </div>
+              <div className="edit-actions">
+                <button
+                  className="btn save"
+                  onClick={async () => {
+                    try {
+                      await axios.put(`/items/${editingItem.id}/`, editingItem);
+                      setItems((prev) =>
+                        prev.map((i) => (i.id === editingItem.id ? editingItem : i))
+                      );
+                      setEditingItem(null);
+                    } catch (err) {
+                      alert('Update failed');
+                      console.error(err);
+                    }
+                  }}
+                >
+                  ✅ Save Changes
+                </button>
+                <button className="btn cancel" onClick={() => setEditingItem(null)}>
+                  ❌ Cancel
+                </button>
+              </div>
             </div>
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default InvoicePage;
+export default ViewItems;

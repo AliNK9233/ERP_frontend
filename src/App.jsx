@@ -1,12 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
 import AddItem from '@/pages/AddItem';
 import ViewItems from '@/pages/ViewItems';
-import ProtectedRoute from '@/routes/ProtectedRoute';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { fetchUser } from '@/features/auth/authSlice';
 import AddCustomer from '@/pages/AddCustomer';
 import ViewCustomers from '@/pages/ViewCustomers';
 import EditCustomer from '@/pages/EditCustomer';
@@ -14,6 +13,9 @@ import AddSale from '@/pages/AddSale';
 import ViewSales from '@/pages/ViewSales';
 import SaleItemsPage from '@/pages/SaleItemsPage';
 
+import ProtectedRoute from '@/routes/ProtectedRoute';
+import { fetchUser } from '@/features/auth/authSlice';
+import MainLayout from '@/layouts/MainLayout';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -32,79 +34,35 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-  <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
 
-  <Route path="/dashboard" element={
-    <ProtectedRoute>
-      <Dashboard />
-    </ProtectedRoute>
-  } />
+        {/* Protected Routes with Header */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/add-item" element={<AddItem />} />
+          <Route path="/items" element={<ViewItems />} />
+          <Route path="/add-customer" element={<AddCustomer />} />
+          <Route path="/customers" element={<ViewCustomers />} />
+          <Route path="/edit-customer/:id" element={<EditCustomer />} />
+          <Route path="/add-sale" element={<AddSale />} />
+          <Route path="/sales" element={<ViewSales />} />
+          <Route path="/sale-items/:invoiceId" element={<SaleItemsPage />} />
+        </Route>
 
-  <Route path="/add-item" element={
-    <ProtectedRoute>
-      <AddItem />
-    </ProtectedRoute>
-  } />
-
-  <Route path="/items" element={
-    <ProtectedRoute>
-      <ViewItems />
-    </ProtectedRoute>
-  } />
-
-  <Route path="/add-customer" element={
-    <ProtectedRoute>
-      <AddCustomer />
-    </ProtectedRoute>
-  } />
-
-  <Route path="/customers" element={
-    <ProtectedRoute>
-      <ViewCustomers />
-    </ProtectedRoute>
-  } />
-
-<Route
-  path="/edit-customer/:id"
-  element={
-    <ProtectedRoute>
-      <EditCustomer />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/add-sale"
-  element={
-    <ProtectedRoute>
-      <AddSale />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/sales" 
-  element={
-    <ProtectedRoute>
-      <ViewSales />
-    </ProtectedRoute>
-  }   
-  />
-<Route
-  path="/sale-items/:invoiceId"
-  element={
-    <ProtectedRoute>
-      <SaleItemsPage />
-    </ProtectedRoute>
-  }
-/>
-
-
-  <Route path="*" element={
-  access ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-} />
+        {/* Fallback */}
+        <Route
+          path="*"
+          element={access ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
+        />
       </Routes>
     </BrowserRouter>
   );
 };
-
 
 export default App;

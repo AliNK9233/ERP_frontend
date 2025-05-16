@@ -3,6 +3,7 @@ import axios from '@/utils/axios';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import './Styles/ViewSales.css';
 
 const ViewSales = () => {
   const { access } = useSelector((state) => state.auth);
@@ -55,9 +56,8 @@ const ViewSales = () => {
     try {
       const res = await axios.get(`/test-invoice/${saleId}/`, {
         headers: { Authorization: `Bearer ${access}` },
-        responseType: 'blob' // Required to handle PDF binary
+        responseType: 'blob'
       });
-  
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -100,14 +100,13 @@ const ViewSales = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">📄 Sales List</h2>
+    <div className="view-sales-container">
+      <h2 className="title">📄 Sales List</h2>
 
-      <div className="flex gap-4 mb-4">
+      <div className="filters">
         <select
           value={filters.customer}
           onChange={(e) => setFilters({ ...filters, customer: e.target.value })}
-          className="border p-2 rounded"
         >
           <option value="">All Customers</option>
           {customers.map(c => (
@@ -118,18 +117,18 @@ const ViewSales = () => {
         <select
           value={filters.month}
           onChange={(e) => setFilters({ ...filters, month: e.target.value })}
-          className="border p-2 rounded"
         >
           <option value="">All Months</option>
           {[...Array(12).keys()].map(m => (
-            <option key={m + 1} value={m + 1}>{new Date(0, m).toLocaleString('default', { month: 'long' })}</option>
+            <option key={m + 1} value={m + 1}>
+              {new Date(0, m).toLocaleString('default', { month: 'long' })}
+            </option>
           ))}
         </select>
 
         <select
           value={filters.year}
           onChange={(e) => setFilters({ ...filters, year: e.target.value })}
-          className="border p-2 rounded"
         >
           <option value="">All Years</option>
           {[2023, 2024, 2025].map(y => (
@@ -137,67 +136,63 @@ const ViewSales = () => {
           ))}
         </select>
 
-        <button onClick={exportToExcel} className="bg-green-600 text-white px-4 py-2 rounded">
+        <button onClick={exportToExcel} className="btn-export">
           📁 Export to Excel
         </button>
       </div>
 
-      <table className="w-full border">
-        <thead className="bg-gray-100">
+      <table className="sales-table">
+        <thead>
           <tr>
-            <th className="p-2 border">Invoice #</th>
-            <th className="p-2 border">Customer</th>
-            <th className="p-2 border">Total</th>
-            <th className="p-2 border">Date</th>
-            <th className="p-2 border">Paid</th>
-            <th className="p-2 border">Invoice</th>
-            <th className="p-2 border">Actions</th>
+            <th>Invoice #</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Paid</th>
+            <th>Invoice</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {filteredSales.map(sale => (
-            <tr key={sale.id} className="text-center">
-              <Link to={`/sale-items/${sale.id}`} className="text-blue-600 underline">
-  {sale.invoice_number}
-</Link>
-
-              <td className="border p-2">{sale.customer_name || 'N/A'}</td>
-              <td className="border p-2">₹{sale.total_amount}</td>
-              <td className="border p-2">{sale.date ? new Date(sale.date).toLocaleString() : 'N/A'}</td>
-              <td className="border p-2">{sale.is_paid ? '✅' : '❌'}</td>
-              <td className="border p-2">
-              <td className="border p-2">
-                <button
-                  onClick={() => downloadPDF(sale.id, sale.invoice_number)}
-                  className="text-blue-600 underline"
-                >
+            <tr key={sale.id}>
+              <td>
+                <Link to={`/sale-items/${sale.id}`} className="link-invoice">
+                  {sale.invoice_number}
+                </Link>
+              </td>
+              <td>{sale.customer_name || 'N/A'}</td>
+              <td>₹{sale.total_amount}</td>
+              <td>{sale.date ? new Date(sale.date).toLocaleString() : 'N/A'}</td>
+              <td>{sale.is_paid ? '✅' : '❌'}</td>
+              <td>
+                <button onClick={() => downloadPDF(sale.id, sale.invoice_number)} className="btn-link">
                   Download PDF
                 </button>
               </td>
-              </td>
-              <td className="border p-2">
+              <td>
                 {!sale.is_cancelled ? (
                   <button
                     onClick={() => cancelSale(sale.id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded"
+                    className="btn-cancel"
                   >
                     Cancel
                   </button>
                 ) : (
-                  <span className="text-gray-500">Cancelled</span>
+                  <span className="text-muted">Cancelled</span>
                 )}
               </td>
             </tr>
           ))}
           {filteredSales.length === 0 && (
             <tr>
-              <td colSpan="7" className="text-center p-4">No sales found.</td>
+              <td colSpan="7" className="text-center no-data">No sales found.</td>
             </tr>
           )}
         </tbody>
       </table>
 
-      <div className="text-right font-bold text-lg mt-4">
+      <div className="total-amount">
         Total for filtered sales: ₹{totalAmount.toFixed(2)}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from '@/utils/axios';
 import { useSelector } from 'react-redux';
+import './Styles/AddItem.css';
 
 const AddItem = () => {
   const [form, setForm] = useState({
@@ -37,15 +38,15 @@ const AddItem = () => {
       setSuccess(true);
       setForm({ ...form, code: '', description: '', quantity: 0 });
     } catch (error) {
-      alert("❌ Error adding item: " + error.response?.data?.detail || "Check inputs");
+      alert("❌ Error adding item: " + (error.response?.data?.detail || "Check inputs"));
     }
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">➕ Add Item</h2>
-      {success && <p className="text-green-600 mb-4">✅ Item added successfully!</p>}
-      <form onSubmit={handleSubmit} className="grid gap-3">
+    <div className="add-item-container">
+      <h2 className="add-item-title">➕ Add Item</h2>
+      {success && <p className="add-item-success">✅ Item added successfully!</p>}
+      <form onSubmit={handleSubmit} className="add-item-form">
         {[
           { name: 'code', type: 'text' },
           { name: 'description', type: 'text' },
@@ -67,11 +68,11 @@ const AddItem = () => {
             placeholder={name.replace(/_/g, ' ').toUpperCase()}
             value={form[name]}
             onChange={handleChange}
-            className="border p-2 rounded"
+            className="add-item-input"
             required={['code', 'description', 'quantity', 'purchase_price', 'selling_price'].includes(name)}
           />
         ))}
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Save Item</button>
+        <button type="submit" className="add-item-button">Save Item</button>
       </form>
     </div>
   );
