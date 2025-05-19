@@ -28,41 +28,58 @@ const AddCustomer = () => {
       setSuccess(true);
       setForm({ name: '', phone: '', address: '', gst_number: '' });
     } catch (err) {
-      alert('❌ Failed to add customer');
+      alert('Error: Failed to add customer');
     }
   };
 
   return (
     <div className="add-customer-container">
-      <h2 className="add-customer-title">➕ Add Customer</h2>
-      {success && <p className="add-customer-success">✅ Customer added successfully!</p>}
+      <h2 className="add-customer-title">Add Customer</h2>
+      {success && <p className="add-customer-success">Customer added successfully!</p>}
+
       <form onSubmit={handleSubmit} className="add-customer-form">
-        <input
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="phone"
-          placeholder="Phone"
-          value={form.phone}
-          onChange={handleChange}
-        />
-        <textarea
-          name="address"
-          placeholder="Address"
-          value={form.address}
-          onChange={handleChange}
-        />
-        <input
-          name="gst_number"
-          placeholder="GST Number"
-          value={form.gst_number}
-          onChange={handleChange}
-        />
-        <button type="submit">Save</button>
+        <div className="form-group">
+          <label htmlFor="name">Name<span>*</span></label>
+          <input
+            id="name"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="phone">Phone</label>
+          <input
+            id="phone"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="address">Address</label>
+          <textarea
+            id="address"
+            name="address"
+            value={form.address}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="gst_number">GST Number</label>
+          <input
+            id="gst_number"
+            name="gst_number"
+            value={form.gst_number}
+            onChange={handleChange}
+          />
+        </div>
+
+        <button type="submit">Save Customer</button>
       </form>
     </div>
   );

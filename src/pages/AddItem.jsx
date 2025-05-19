@@ -38,39 +38,41 @@ const AddItem = () => {
       setSuccess(true);
       setForm({ ...form, code: '', description: '', quantity: 0 });
     } catch (error) {
-      alert("❌ Error adding item: " + (error.response?.data?.detail || "Check inputs"));
+      alert("Error adding item: " + (error.response?.data?.detail || "Check inputs"));
     }
   };
 
   return (
     <div className="add-item-container">
-      <h2 className="add-item-title">➕ Add Item</h2>
-      {success && <p className="add-item-success">✅ Item added successfully!</p>}
+      <h2 className="add-item-title">Add New Item</h2>
+      {success && <p className="add-item-success">Item added successfully.</p>}
+
       <form onSubmit={handleSubmit} className="add-item-form">
         {[
-          { name: 'code', type: 'text' },
-          { name: 'description', type: 'text' },
-          { name: 'brand', type: 'text' },
-          { name: 'category', type: 'text' },
-          { name: 'expiry_date', type: 'date' },
-          { name: 'quantity', type: 'number' },
-          { name: 'purchase_price', type: 'number' },
-          { name: 'selling_price', type: 'number' },
-          { name: 'offer_price', type: 'number' },
-          { name: 'offer_valid_until', type: 'date' },
-          { name: 'batch_number', type: 'text' },
-          { name: 'storage_location', type: 'text' },
-        ].map(({ name, type }) => (
-          <input
-            key={name}
-            type={type}
-            name={name}
-            placeholder={name.replace(/_/g, ' ').toUpperCase()}
-            value={form[name]}
-            onChange={handleChange}
-            className="add-item-input"
-            required={['code', 'description', 'quantity', 'purchase_price', 'selling_price'].includes(name)}
-          />
+          { name: 'code', type: 'text', label: 'Item Code' },
+          { name: 'description', type: 'text', label: 'Description' },
+          { name: 'brand', type: 'text', label: 'Brand' },
+          { name: 'category', type: 'text', label: 'Category' },
+          { name: 'expiry_date', type: 'date', label: 'Expiry Date' },
+          { name: 'quantity', type: 'number', label: 'Quantity' },
+          { name: 'purchase_price', type: 'number', label: 'Purchase Price' },
+          { name: 'selling_price', type: 'number', label: 'Selling Price' },
+          { name: 'offer_price', type: 'number', label: 'Offer Price' },
+          { name: 'offer_valid_until', type: 'date', label: 'Offer Valid Until' },
+          { name: 'batch_number', type: 'text', label: 'Batch Number' },
+          { name: 'storage_location', type: 'text', label: 'Storage Location' },
+        ].map(({ name, type, label }) => (
+          <div className="form-group" key={name}>
+            <label htmlFor={name}>{label}</label>
+            <input
+              id={name}
+              type={type}
+              name={name}
+              value={form[name]}
+              onChange={handleChange}
+              required={['code', 'description', 'quantity', 'purchase_price', 'selling_price'].includes(name)}
+            />
+          </div>
         ))}
         <button type="submit" className="add-item-button">Save Item</button>
       </form>

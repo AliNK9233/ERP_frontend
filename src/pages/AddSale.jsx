@@ -80,6 +80,8 @@ const AddSale = () => {
         const item = getItemByCode(r.code);
         return { item: item.id, quantity: r.quantity, price: item.selling_price };
       });
+      console.log(saleItems)
+      console.log( access),
 
       await axios.post('/sales/', {
         customer: parseInt(customer),
