@@ -28,8 +28,8 @@ const App = () => {
   }, [access, user, dispatch]);
 
   if (access && !initialized) {
-    return <div className="p-4 text-center">🔄 Restoring session...</div>;
-  }
+  return <div className="p-4 text-center">🔄 Restoring session...</div>;
+}
 
   return (
     <BrowserRouter>
@@ -57,8 +57,12 @@ const App = () => {
 
         {/* Fallback */}
         <Route
+  path="/login"
+  element={access && user ? <Navigate to="/add-sale" /> : <Login />}
+/>
+        <Route
           path="*"
-          element={access ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
+          element={access ? <Navigate to="/add-sale" /> : <Navigate to="/login" />}
         />
       </Routes>
     </BrowserRouter>

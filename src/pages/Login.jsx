@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, fetchUser } from '@/features/auth/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import './Styles/Login.css';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading, error, access, user } = useSelector((state) => state.auth);
+
+  // ✅ Redirect if already logged in
+  if (access && user) {
+    return <Navigate to="/add-sale" />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,11 +24,15 @@ const Login = () => {
       setFormError('Username and password are required');
       return;
     }
+
     setFormError('');
     const res = await dispatch(loginUser({ username, password }));
+
     if (res.meta.requestStatus === 'fulfilled') {
-      await dispatch(fetchUser());
-      navigate('/dashboard');
+      const userRes = await dispatch(fetchUser());
+      if (userRes.meta.requestStatus === 'fulfilled') {
+        navigate('/add-sale');
+      }
     }
   };
 
