@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import axios from '@/utils/axios';
 import { useSelector } from 'react-redux';
@@ -10,6 +11,7 @@ const AddSale = () => {
   const [items, setItems] = useState([]);
   const [rows, setRows] = useState([{ code: '', quantity: 1 }]);
   const [customer, setCustomer] = useState('');
+  const [customerName, setCustomerName] = useState('');
   const [customers, setCustomers] = useState([]);
   const [businessTax, setBusinessTax] = useState(0);
   const [whatsapp, setWhatsapp] = useState(false);
@@ -41,6 +43,12 @@ const AddSale = () => {
     setRows(updated);
   };
 
+  const handleCustomerTyping = (name) => {
+    setCustomerName(name);
+    const match = customers.find(c => c.name === name);
+    setCustomer(match ? match.id : '');
+  };
+
   const addRow = () => setRows([...rows, { code: '', quantity: 1 }]);
 
   const deleteRow = (index) => {
@@ -54,7 +62,7 @@ const AddSale = () => {
     let subtotal = 0;
     rows.forEach(({ code, quantity }) => {
       const item = getItemByCode(code);
-      if (item) subtotal += item.selling_price * quantity;
+      if (item) subtotal += parseFloat(item.selling_price) * quantity;
     });
     const tax = subtotal * (businessTax / 100);
     const total = subtotal + tax;
@@ -64,40 +72,50 @@ const AddSale = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!customer) {
-      toast.error('Please select a customer');
-      return;
-    }
+    const invalidRow = rows.some(r => {
+      const item = getItemByCode(r.code);
+      if (!item) console.warn('❗ Invalid item code:', r.code);
+      return !r.code || r.quantity <= 0 || !item;
+    });
 
-    const invalidRow = rows.some(r => !r.code || r.quantity <= 0 || !getItemByCode(r.code));
     if (invalidRow) {
       toast.error('Please fill all item rows correctly');
       return;
     }
 
-    try {
-      const saleItems = rows.map(r => {
-        const item = getItemByCode(r.code);
-        return { item: item.id, quantity: r.quantity, price: item.selling_price };
-      });
-      console.log(saleItems)
-      console.log( access),
+    const saleItems = rows.map(r => {
+      const item = getItemByCode(r.code);
+      return {
+        item: item.id,
+        quantity: r.quantity,
+        price: parseFloat(item.selling_price)
+      };
+    });
 
-      await axios.post('/sales/', {
-        customer: parseInt(customer),
-        total_amount: summary.total,
-        payment_method: 'cash',
-        payment_status: 'paid',
-        items: saleItems
-      }, {
+    const payload = {
+      customer: customer || null,
+      total_amount: summary.total,
+      payment_method: 'cash',
+      payment_status: 'paid',
+      items: saleItems
+    };
+
+    console.log('🧾 Payload to send:', payload);
+
+    try {
+      await axios.post('/sales/', payload, {
         headers: { Authorization: `Bearer ${access}` }
       });
 
       toast.success('✅ Sale saved successfully');
       setRows([{ code: '', quantity: 1 }]);
       setCustomer('');
-    } catch {
+      setCustomerName('');
+    } catch (error) {
       toast.error('❌ Sale failed');
+      const errorData = error.response?.data || {};
+      console.error('🛑 Sale error:', errorData);
+      alert("Sale error:\n" + JSON.stringify(errorData, null, 2));
     }
   };
 
@@ -106,10 +124,17 @@ const AddSale = () => {
       <ToastContainer />
       <h2 className="add-sale-title">🧾 New Sale</h2>
       <form onSubmit={handleSubmit} className="add-sale-form">
-        <select value={customer} onChange={(e) => setCustomer(e.target.value)}>
-          <option value="">Select Customer</option>
-          {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
+        <input
+          list="customer-list"
+          placeholder="Search Customer"
+          value={customerName}
+          onChange={(e) => handleCustomerTyping(e.target.value)}
+        />
+        <datalist id="customer-list">
+          {customers.map(c => (
+            <option key={c.id} value={c.name} />
+          ))}
+        </datalist>
 
         {rows.map((row, i) => {
           const item = getItemByCode(row.code);
@@ -118,9 +143,15 @@ const AddSale = () => {
               <input
                 type="text"
                 placeholder="Item Code"
+                list={`item-codes-${i}`}
                 value={row.code}
                 onChange={(e) => handleRowChange(i, 'code', e.target.value)}
               />
+              <datalist id={`item-codes-${i}`}>
+                {items.map(it => (
+                  <option key={it.id} value={it.code} />
+                ))}
+              </datalist>
               <input
                 type="number"
                 placeholder="Qty"
