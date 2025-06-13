@@ -23,6 +23,20 @@ const ViewCustomers = () => {
     fetchCustomers();
   }, [access]);
 
+  const handleDelete = async (id) => {
+  const confirm = window.confirm("Are you sure you want to delete this customer?");
+  if (!confirm) return;
+
+  try {
+    await axios.delete(`/customers/${id}/`, {
+      headers: { Authorization: `Bearer ${access}` },
+    });
+    setCustomers((prev) => prev.filter((c) => c.id !== id));
+  } catch (err) {
+    alert("❌ Failed to delete customer");
+    console.error(err);
+  }
+};
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditingCustomer({ ...editingCustomer, [name]: value });
@@ -65,13 +79,10 @@ const ViewCustomers = () => {
                 <td>{c.address}</td>
                 <td>{c.gst_number || '-'}</td>
                 <td>
-                  <button
-                    className="edit-button"
-                    onClick={() => setEditingCustomer(c)}
-                  >
-                    Edit
-                  </button>
-                </td>
+  <button className="edit-button" onClick={() => setEditingCustomer(c)}>Edit</button>
+  <span style={{ margin: '0 8px' }}>|</span>
+  <button className="delete-button" onClick={() => handleDelete(c.id)}>Delete</button>
+</td>
               </tr>
             ))}
             {customers.length === 0 && (
